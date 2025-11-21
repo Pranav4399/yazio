@@ -36,25 +36,23 @@ npm run generate
 
 ### Prerequisites
 - GitHub repository created
-- Repository name should match the base URL (e.g., `yazio`)
 
-### Steps
+### Option A: Deploy to Root Domain (Recommended)
+If you want your site at `https://YOUR_USERNAME.github.io/`:
+
+1. **Rename your repository** to `YOUR_USERNAME.github.io`
+2. **Push your code to GitHub**
+3. **Enable GitHub Pages** with "GitHub Actions" source
+4. **Access your site** at: `https://YOUR_USERNAME.github.io/`
+
+### Option B: Keep Current Repository Name
+If you want to keep the `yazio` repository name:
 
 1. **Push your code to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
+2. **Enable GitHub Pages** with "GitHub Actions" source
+3. **Access your site** at: `https://YOUR_USERNAME.github.io/yazio/`
 
-2. **Enable GitHub Pages**
-   - Go to your repository settings
-   - Navigate to Pages section
-   - Select "GitHub Actions" as source
-   - Wait for automatic deployment
-
-3. **Access your site**
-   Your app will be available at: `https://YOUR_USERNAME.github.io/yazio/`
+**Note**: Option A gives you the clean root URL, while Option B keeps `/yazio` in the URL.
 
 ### Manual Deployment
 ```bash
