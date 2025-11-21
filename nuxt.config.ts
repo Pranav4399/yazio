@@ -28,18 +28,7 @@ export default defineNuxtConfig({
     }
   },
 
-  // Build configuration for static generation
-  nitro: {
-    preset: 'static',
-    output: {
-      publicDir: 'dist'
-    }
-  },
 
-  // Generate static files for GitHub Pages
-  generate: {
-    routes: ['/']
-  },
 
   // App configuration
   app: {
