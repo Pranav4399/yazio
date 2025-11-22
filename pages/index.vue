@@ -51,13 +51,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { usePageAnalytics } from '~/composables/useAnalytics'
 import { useSupabase } from '~/composables/useSupabase'
 import '~/styles/index.css'
 
 // Composables
-const { login } = useSupabase()
+const { login, isAuthenticated } = useSupabase()
 const analytics = usePageAnalytics('login')
 
 // Login form state
@@ -68,6 +68,13 @@ const loginForm = ref({
 
 const isLoading = ref(false)
 const errorMessage = ref('')
+
+// Check authentication on mount and redirect if already logged in
+onMounted(() => {
+  if (isAuthenticated()) {
+    navigateTo('/welcome')
+  }
+})
 
 // Handle login
 const handleLogin = async () => {
