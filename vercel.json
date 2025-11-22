@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist",
+  "framework": "nuxt",
+  "functions": {
+    "**/*.js": {
+      "maxDuration": 10
+    }
+  }
+}
