@@ -1,9 +1,4 @@
 {
   "buildCommand": "npm run vercel-build",
-  "outputDirectory": "dist",
-  "functions": {
-    "**/*.js": {
-      "maxDuration": 10
-    }
-  }
+  "outputDirectory": "dist"
 }
