@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "deploy": "npm run generate && touch dist/.nojekyll"
+    "deploy": "npm run generate && touch dist/.nojekyll",
+    "vercel-build": "npm run build"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
@@ -19,9 +20,13 @@
     "vue-router": "^4.4.0",
     "vue-tsc": "^2.0.0"
   },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "@primevue/themes": "^4.4.1",
-    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/supabase-js": "^2.48.0",
     "@vueuse/core": "^14.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.4.1",
