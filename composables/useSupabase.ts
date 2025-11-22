@@ -13,7 +13,7 @@ const createMockSupabase = (errorMessage: string) => ({
   profiles: { getUserProfile: () => null, updateUserProfile: () => false },
   quiz: { getQuizQuestions: () => null, updateQuizQuestions: () => false, deleteQuizQuestion: () => false },
   quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
-  featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null, updateFeatureFlag: () => false },
+  featureFlags: { getAllFeatureFlags: () => null, updateFeatureFlag: () => false },
   analytics: { trackEvent: () => false, getUserAnalytics: () => null, saveSessionEvent: () => {} }
 })
 
@@ -117,7 +117,6 @@ export const useSupabaseProfiles = (supabase: any) => {
   }
 
   const updateUserProfile = async (userId: string, updates: Partial<Omit<UserProfile, 'id' | 'user_id' | 'created_at'>>): Promise<boolean> => {
-    console.log('updates', updates)
     const { error } = await supabase
       .from('user_profiles')
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -204,18 +203,7 @@ export const useSupabaseQuiz = (supabase: any) => {
 // Feature flags functions
 export const useSupabaseFeatureFlags = (supabase: any) => {
 
-  const getFeatureFlag = async (key: string): Promise<string | null> => {
-    const { data, error } = await supabase
-      .from('feature_flags')
-      .select('value')
-      .eq('key', key)
-      .single()
-
-    if (error) return null
-    return data.value
-  }
-
-  const getAllFeatureFlags = async (): Promise<Record<string, boolean>[] | null> => {
+  const getAllFeatureFlags = async (): Promise<{ key: string; value: boolean }[] | null> => {
     const { data, error } = await supabase
       .from('feature_flags')
       .select('key, value')
@@ -240,7 +228,6 @@ export const useSupabaseFeatureFlags = (supabase: any) => {
   }
 
   return {
-    getFeatureFlag,
     getAllFeatureFlags,
     updateFeatureFlag
   }

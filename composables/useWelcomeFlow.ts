@@ -48,7 +48,7 @@ const useGlobalUser = () => {
 
 // Global feature flags state (loaded by useWelcomeFlow on app mount)
 const useGlobalFeatureFlags = () => {
-  return useState<Record<string, string>>('global-feature-flags', () => ({}))
+  return useState<{ key: string; value: boolean }[]>('global-feature-flags', () => [])
 }
 
 // Global quiz state (loaded by useWelcomeFlow on app mount)

@@ -41,14 +41,8 @@ const handleLogout = () => {
 }
 
 .app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
   background: white;
   border-bottom: 1px solid #e5e7eb;
-  padding: 1rem 2rem;
 }
 
 .header-content {
@@ -57,6 +51,7 @@ const handleLogout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 2rem;
 }
 
 .logout-button {

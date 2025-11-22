@@ -147,20 +147,6 @@ const trackEvent = (event: string, page: string, data?: Record<string, any>) => 
   }
 }
 
-// Track quiz answers
-const trackQuizAnswer = (questionId: string, questionIndex: number, answer: string, timeSpent: number, skipped: boolean = false) => {
-  const quizEvent: QuizAnswerEvent = {
-    questionId,
-    questionIndex,
-    answer,
-    timeSpent,
-    skipped,
-    timestamp: Date.now()
-  }
-
-  trackEvent('quiz_answer', 'quiz', quizEvent)
-}
-
 // Track user interactions
 const trackInteraction = (interaction: string, element: string, data?: Record<string, any>) => {
   trackEvent('user_interaction', currentPage.value, {
@@ -197,14 +183,6 @@ const getAnalyticsData = () => {
   }
 }
 
-// Clear analytics data (useful for testing)
-const clearAnalyticsData = () => {
-  analyticsEvents.value = []
-  pageVisits.value = []
-  currentPage.value = ''
-  pageEntryTime.value = 0
-}
-
 
 // Vue composable
 export const useAnalytics = () => {
@@ -233,12 +211,8 @@ export const useAnalytics = () => {
     trackFormSubmit,
     trackError,
 
-    // Quiz specific
-    trackQuizAnswer,
-
     // Data management
     getAnalyticsData,
-    clearAnalyticsData,
 
     // Reactive data for components that need it
     currentPage: readonly(currentPage),
