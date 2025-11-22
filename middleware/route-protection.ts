@@ -5,22 +5,23 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
   // Check authentication for protected routes
   const { isAuthenticated } = useSupabase()
 
-  // Define protected routes (all except home page)
-  const protectedRoutes = ['/goal', '/quiz', '/branding', '/summary', '/payment']
+  // Define protected routes (all except login page)
+  const protectedRoutes = ['/welcome', '/goal', '/quiz', '/branding', '/summary', '/payment']
 
   if (protectedRoutes.includes(to.path) && !isAuthenticated()) {
-    // Redirect to home page (login) if not authenticated
+    // Redirect to login page if not authenticated
     return navigateTo('/')
   }
 
-  // Allow navigation to home page from anywhere
+  // Allow navigation to login page from anywhere
   if (to.path === '/') {
     return
   }
 
   // Allow navigation from any valid previous page in the flow
   const allowedTransitions: Record<string, string[]> = {
-    '/goal': ['/'], // goal can only be accessed from home
+    '/welcome': ['/'], // welcome can only be accessed from login
+    '/goal': ['/welcome'], // goal can only be accessed from welcome
     '/quiz': ['/goal'], // quiz can only be accessed from goal
     '/branding': ['/quiz'], // branding can only be accessed from quiz
     '/summary': ['/quiz', '/branding'], // summary can be accessed from quiz or branding
@@ -34,7 +35,8 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
 
   // Allow back navigation within the flow (reverse direction)
   const reverseTransitions: Record<string, string[]> = {
-    '/': ['/goal'], // allow going back to home from goal
+    '/': ['/welcome'], // allow going back to login from welcome
+    '/welcome': ['/goal'], // allow going back to welcome from goal
     '/goal': ['/quiz'], // allow going back to goal from quiz
     '/quiz': ['/branding', '/summary'], // allow going back to quiz from branding or summary
     '/branding': ['/summary'], // allow going back to branding from summary

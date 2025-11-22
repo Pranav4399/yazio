@@ -1,6 +1,6 @@
 <template>
-  <!-- Show login page if not authenticated -->
-  <div v-if="!authState && !loading" class="login-container">
+  <!-- Always show login page -->
+  <div class="login-container">
     <div class="login-content">
       <div class="login-header">
         <h1 class="login-title">Welcome Back to YAZIO</h1>
@@ -48,44 +48,17 @@
       </div>
     </div>
   </div>
-
-  <!-- Show loading spinner while data is loading -->
-  <div v-else-if="loading" class="loading-container">
-    <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
-    animationDuration=".5s" aria-label="Custom ProgressSpinner" />
-  </div>
-
-  <!-- Show welcome page if authenticated and data loaded -->
-  <div v-else class="welcome-container">
-    <div class="welcome-content">
-      <div class="welcome-text">
-        <p class="greeting">It's great to see you</p>
-        <h1 class="name">{{ userProfile?.name }}</h1>
-        <p class="message">We missed having you around.</p>
-      </div>
-
-      <button class="continue-button" @click="handleContinue">
-        Continue
-      </button>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
-import ProgressSpinner from 'primevue/progressspinner'
 import { ref } from 'vue'
 import { usePageAnalytics } from '~/composables/useAnalytics'
 import { useSupabase } from '~/composables/useSupabase'
-import { useWelcomeFlow } from '~/composables/useWelcomeFlow'
 import '~/styles/index.css'
 
 // Composables
-const { userProfile, loadUserProfile, loading } = useWelcomeFlow()
-const { login, isAuthenticated } = useSupabase()
-const analytics = usePageAnalytics('welcome')
-
-// Handle hydration mismatch - ensure auth state is only checked on client
-const authState = computed(() => isAuthenticated() ?? false) 
+const { login } = useSupabase()
+const analytics = usePageAnalytics('login')
 
 // Login form state
 const loginForm = ref({
@@ -95,7 +68,6 @@ const loginForm = ref({
 
 const isLoading = ref(false)
 const errorMessage = ref('')
-
 
 // Handle login
 const handleLogin = async () => {
@@ -112,9 +84,8 @@ const handleLogin = async () => {
 
     if (result.success) {
       analytics.trackInteraction('login', 'login_form', { success: true })
-      // Update auth state and load user profile after successful login
-      await loadUserProfile()
-      // Redirect will happen automatically due to reactivity
+      // Navigate to welcome page after successful login
+      navigateTo('/welcome')
     } else {
       errorMessage.value = result.error || 'Login failed'
       analytics.trackInteraction('login', 'login_form', { success: false, error: result.error })
@@ -126,14 +97,6 @@ const handleLogin = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-
-// Handle continue button (only shown when authenticated)
-const handleContinue = async () => {
-  analytics.trackInteraction('click', 'continue_button', { action: 'start_journey' })
-  // Navigate to confirm goal page
-  navigateTo('/goal')
 }
 </script>
 
