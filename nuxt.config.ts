@@ -12,19 +12,6 @@ export default defineNuxtConfig({
     'primeicons/primeicons.css'
   ],
 
-  runtimeConfig: {
-    public: {
-      supabase: {
-        url: process.env.SUPABASE_URL,
-        anonKey: process.env.SUPABASE_ANON_KEY
-      },
-      primevue: {
-        theme: 'aura',
-        ripple: true
-      }
-    }
-  },
-
   // Configure router options
   router: {
     options: {

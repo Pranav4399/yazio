@@ -303,9 +303,7 @@ export const useSupabaseAnalytics = (supabase: any) => {
 // Main composable that combines everything
 export const useSupabase = () => {
   try {
-    const config = useRuntimeConfig()
-
-    if (!config.public.supabase?.url || !config.public.supabase?.anonKey) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
       console.error('Supabase configuration missing. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.')
       // Return a mock object to prevent crashes
       return {
@@ -321,7 +319,7 @@ export const useSupabase = () => {
       }
     }
 
-    const supabase = createClient(config.public.supabase.url, config.public.supabase.anonKey)
+    const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY)
 
     return {
       supabase,
