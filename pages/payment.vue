@@ -166,9 +166,9 @@ const { quizResponses } = useQuizManagement();
 // Paywall variant selection
 const selectedVariant = computed<PaywallVariant>(() => {
   return selectPaywallVariant({
-    goal: userProfile.value.goal,
-    dietaryPreference: userProfile.value.dietaryPreference,
-    timeCommitment: userProfile.value.timeCommitment,
+    goal: userProfile.value?.goal || 'lose-weight',
+    dietaryPreference: userProfile.value?.dietaryPreference,
+    timeCommitment: userProfile.value?.timeCommitment,
     quizAnswers: quizResponses.value.answers,
   });
 });

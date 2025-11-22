@@ -1,6 +1,18 @@
 import type { RouteLocationNormalized } from 'vue-router'
+import { useSupabase } from '~/composables/useSupabase'
 
 export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: RouteLocationNormalized) => {
+  // Check authentication for protected routes
+  const { isAuthenticated } = useSupabase()
+
+  // Define protected routes (all except home page)
+  const protectedRoutes = ['/goal', '/quiz', '/branding', '/summary', '/payment']
+
+  if (protectedRoutes.includes(to.path) && !isAuthenticated()) {
+    // Redirect to home page (login) if not authenticated
+    return navigateTo('/')
+  }
+
   // Allow navigation to home page from anywhere
   if (to.path === '/') {
     return
@@ -10,7 +22,8 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
   const allowedTransitions: Record<string, string[]> = {
     '/goal': ['/'], // goal can only be accessed from home
     '/quiz': ['/goal'], // quiz can only be accessed from goal
-    '/summary': ['/quiz'], // summary can only be accessed from quiz
+    '/branding': ['/quiz'], // branding can only be accessed from quiz
+    '/summary': ['/quiz', '/branding'], // summary can be accessed from quiz or branding
     '/payment': ['/summary'] // payment can only be accessed from summary
   }
 
@@ -23,7 +36,8 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
   const reverseTransitions: Record<string, string[]> = {
     '/': ['/goal'], // allow going back to home from goal
     '/goal': ['/quiz'], // allow going back to goal from quiz
-    '/quiz': ['/summary'], // allow going back to quiz from summary
+    '/quiz': ['/branding', '/summary'], // allow going back to quiz from branding or summary
+    '/branding': ['/summary'], // allow going back to branding from summary
     '/summary': ['/payment'] // allow going back to summary from payment
   }
 

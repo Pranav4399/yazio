@@ -17,19 +17,19 @@
         <div class="summary-section">
           <h2 class="section-title">Personal Information</h2>
           <div class="info-grid">
-            <div class="info-item">
+            <div class="info-item" v-if="userProfile">
               <span class="info-label">Name</span>
               <span class="info-value">{{ userProfile.name }}</span>
             </div>
-            <div class="info-item">
+            <div class="info-item" v-if="userProfile">
               <span class="info-label">Fitness Goal</span>
               <span class="info-value">{{ formatGoal(userProfile.goal) }}</span>
             </div>
-            <div class="info-item" v-if="userProfile.dietaryPreference">
+            <div class="info-item" v-if="userProfile?.dietaryPreference">
               <span class="info-label">Eating Style</span>
               <span class="info-value">{{ formatPreference(userProfile.dietaryPreference) }}</span>
             </div>
-            <div class="info-item" v-if="userProfile.timeCommitment">
+            <div class="info-item" v-if="userProfile?.timeCommitment">
               <span class="info-label">Time Available</span>
               <span class="info-value">{{ formatTime(userProfile.timeCommitment) }}</span>
             </div>
@@ -74,11 +74,13 @@ definePageMeta({
   middleware: 'route-protection'
 })
 
+import { onMounted, ref } from 'vue'
 import ProgressIndicator from '~/components/ProgressIndicator.vue'
 import { usePageAnalytics } from '~/composables/useAnalytics'
+import { useSupabase } from '~/composables/useSupabase'
 import { useGlobalUser, useQuizManagement } from '~/composables/useWelcomeFlow'
 import { PROGRESS_STEPS } from '~/schemas/common'
-import { QUIZ_QUESTIONS, type QuizOption, type QuizQuestion } from '~/schemas/quiz'
+import type { QuizOption, QuizQuestion } from '~/schemas/quiz'
 import '~/styles/summary.css'
 
 const progressSteps = PROGRESS_STEPS
@@ -86,49 +88,51 @@ const progressSteps = PROGRESS_STEPS
 // Analytics
 const analytics = usePageAnalytics('summary')
 
+// Supabase
+const { profiles, getCurrentUser } = useSupabase()
+
 // Global states
 const userProfile = useGlobalUser()
 const { quizResponses } = useQuizManagement()
 
-// Computed properties for formatting
-const formatGoal = (goal: string) => {
-  const goalMap: Record<string, string> = {
-    'lose-weight': 'Lose weight',
-    'gain-weight': 'Gain weight',
-    'maintain-weight': 'Maintain weight',
-    'build-muscle': 'Build muscle',
-    'improve-health': 'Improve health'
-  }
-  return goalMap[goal] || goal
+// Quiz questions from Supabase
+const quizQuestions = ref<QuizQuestion[]>([])
+
+// Generic formatting function (DRY)
+const formatValue = (value: string, mapping: Record<string, string>) => {
+  return mapping[value] || value
 }
 
-const formatPreference = (preference: string) => {
-  const preferenceMap: Record<string, string> = {
-    'balanced': 'Balanced meals',
-    'quick-recipes': 'Quick recipes',
-    'meal-prep': 'Meal prep friendly',
-    'flexible': 'Flexible'
-  }
-  return preferenceMap[preference] || preference
-}
+// Computed properties for formatting (DRY)
+const formatGoal = (goal: string) => formatValue(goal, {
+  'lose-weight': 'Lose weight',
+  'gain-weight': 'Gain weight',
+  'maintain-weight': 'Maintain weight',
+  'build-muscle': 'Build muscle',
+  'improve-health': 'Improve health'
+})
 
-const formatTime = (time: string) => {
-  const timeMap: Record<string, string> = {
-    '15min': '15 minutes or less',
-    '30min': '30 minutes',
-    '1hour': '1 hour or more',
-    'flexible': 'Flexible'
-  }
-  return timeMap[time] || time
-}
+const formatPreference = (preference: string) => formatValue(preference, {
+  'balanced': 'Balanced meals',
+  'quick-recipes': 'Quick recipes',
+  'meal-prep': 'Meal prep friendly',
+  'flexible': 'Flexible'
+})
+
+const formatTime = (time: string) => formatValue(time, {
+  '15min': '15 minutes or less',
+  '30min': '30 minutes',
+  '1hour': '1 hour or more',
+  'flexible': 'Flexible'
+})
 
 const getQuestionTitle = (questionId: string) => {
-  const question = QUIZ_QUESTIONS.find(q => q.id === questionId)
+  const question = quizQuestions.value.find(q => q.id === questionId)
   return question?.title || questionId
 }
 
 const formatAnswer = (questionId: string, answer: string) => {
-  const question = QUIZ_QUESTIONS.find((q: QuizQuestion) => q.id === questionId)
+  const question = quizQuestions.value.find((q: QuizQuestion) => q.id === questionId)
   if (!question) return answer
 
   if (question.type === 'input') {
@@ -137,6 +141,23 @@ const formatAnswer = (questionId: string, answer: string) => {
 
   const option = question.options?.find((opt: QuizOption) => opt.id === answer)
   return option?.label || answer
+}
+
+// Load quiz questions only (global state auto-initializes from DB)
+const loadData = async () => {
+  try {
+    const { quiz } = useSupabase()
+
+    // Load quiz questions for answer formatting
+    const questions = await quiz.getQuizQuestions()
+    if (questions) {
+      quizQuestions.value = questions
+    }
+
+    // Global state (userProfile & quizResponses) auto-initializes from DB
+  } catch (error) {
+    console.error('Failed to load quiz questions:', error)
+  }
 }
 
 // Navigation functions
@@ -158,5 +179,14 @@ const startJourney = () => {
   // Navigate to payment page
   navigateTo('/payment')
 }
+
+// Note: Summary page should ONLY read from global state
+// Global state is auto-initialized from DB on app load
+// No additional DB loading needed here
+
+// Load all data on component mount (DRY)
+onMounted(async () => {
+  await loadData()
+})
 </script>
 

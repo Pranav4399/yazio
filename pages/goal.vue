@@ -75,6 +75,7 @@ definePageMeta({
 import { onMounted, ref } from 'vue'
 import ProgressIndicator from '~/components/ProgressIndicator.vue'
 import { usePageAnalytics } from '~/composables/useAnalytics'
+import { useSupabase } from '~/composables/useSupabase'
 import { useGlobalUser } from '~/composables/useWelcomeFlow'
 import { PROGRESS_STEPS } from '~/schemas/common'
 import type { UserProfile } from '~/schemas/userProfile'
@@ -86,6 +87,9 @@ const progressSteps = PROGRESS_STEPS
 // Analytics
 const analytics = usePageAnalytics('goal')
 
+// Supabase
+const { profiles, getCurrentUser } = useSupabase()
+
 // Global user state
 const userProfile = useGlobalUser()
 
@@ -95,8 +99,8 @@ const formFields = ref(USER_PROFILE_FORM)
 // Edit mode state
 const isEditing = ref(false)
 
-// Form data
-const formData = ref<UserProfile>({
+// Form data (partial profile for editing)
+const formData = ref<Partial<UserProfile>>({
   id: '',
   name: '',
   goal: 'lose-weight',
@@ -106,25 +110,70 @@ const formData = ref<UserProfile>({
 
 // Initialize form with current user data
 onMounted(() => {
-  formData.value = { ...userProfile.value }
+  if (userProfile.value) {
+    formData.value = { ...userProfile.value }
+  }
 })
 
+// Helper function to save profile to database
+const saveProfileToDatabase = async (): Promise<boolean> => {
+  try {
+    const currentUser = getCurrentUser()
+    if (!currentUser || !formData.value.id || !formData.value.name || !formData.value.goal) {
+      console.error('Missing required profile fields')
+      return false
+    }
+
+    // Create update data without id (as expected by updateUserProfile function)
+    const updateData = {
+      name: formData.value.name,
+      goal: formData.value.goal,
+      dietaryPreference: formData.value.dietaryPreference,
+      timeCommitment: formData.value.timeCommitment
+    }
+    console.log('updateData', updateData)
+    const success = await profiles.updateUserProfile(currentUser.id, updateData)
+    if (success) {
+      // Update global state (keep the existing id)
+      userProfile.value = {
+        id: formData.value.id,
+        name: formData.value.name,
+        goal: formData.value.goal,
+        dietaryPreference: formData.value.dietaryPreference,
+        timeCommitment: formData.value.timeCommitment
+      }
+      return true
+    } else {
+      console.error('Failed to save profile to database')
+      return false
+    }
+  } catch (error) {
+    console.error('Error saving profile:', error)
+    return false
+  }
+}
+
 // Toggle edit mode
-const toggleEdit = () => {
+const toggleEdit = async () => {
   if (isEditing.value) {
-    // Save changes to global state
-  userProfile.value = { ...formData.value }
+    const success = await saveProfileToDatabase()
+    if (!success) return // Don't toggle edit mode if save failed
   }
   // Toggle edit mode
   isEditing.value = !isEditing.value
 }
 
 // Handle continue button
-const handleContinue = () => {
+const handleContinue = async () => {
+  // If user is in edit mode with unsaved changes, save them first
+  if (isEditing.value) {
+    await saveProfileToDatabase() // Continue even if save fails
+  }
+
   analytics.trackInteraction('click', 'continue_button', {
-    goal: userProfile.value.goal,
-    dietaryPreference: userProfile.value.dietaryPreference,
-    timeCommitment: userProfile.value.timeCommitment
+    goal: userProfile.value?.goal,
+    dietaryPreference: userProfile.value?.dietaryPreference,
+    timeCommitment: userProfile.value?.timeCommitment
   })
 
   // Navigate to quiz page

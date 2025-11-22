@@ -1,4 +1,5 @@
 import { nextTick, onMounted, onUnmounted, readonly, ref } from 'vue'
+import { useSupabase } from '~/composables/useSupabase'
 
 // Analytics event types
 export interface AnalyticsEvent {
@@ -7,6 +8,7 @@ export interface AnalyticsEvent {
   timestamp: number
   data?: Record<string, any>
   sessionId: string
+  userId?: string
 }
 
 // User flow analytics
@@ -101,20 +103,33 @@ const trackPageVisit = (page: string, fromPage?: string) => {
 
   pageVisits.value.push(visit)
 
-  // Track page visit event
+  // Track page visit event (fire-and-forget)
   trackEvent('page_visit', page, { fromPage: actualFromPage })
 }
 
-// Track generic events
+// Track generic events - save immediately to Supabase (fire-and-forget)
 const trackEvent = (event: string, page: string, data?: Record<string, any>) => {
+  const { analytics: supabaseAnalytics, getCurrentUser } = useSupabase()
+  const currentUser = getCurrentUser()
+
+  if (!currentUser) {
+    console.warn('Cannot track analytics event: User not authenticated')
+    return
+  }
+
   const analyticsEvent: AnalyticsEvent = {
     event,
     page,
     timestamp: Date.now(),
     data: data || {},
-    sessionId: sessionId.value
+    sessionId: sessionId.value,
+    userId: currentUser.id
   }
 
+  // Save event immediately to Supabase (fire-and-forget - no await, no error handling)
+  supabaseAnalytics.saveSessionEvent(currentUser.id, sessionId.value, analyticsEvent)
+
+  // Keep local tracking for immediate access if needed
   analyticsEvents.value.push(analyticsEvent)
 }
 
@@ -221,12 +236,12 @@ export const useAnalytics = () => {
 export const usePageAnalytics = (pageName: string) => {
   const analytics = useAnalytics()
 
-  onMounted(async () => {
+  onMounted(() => {
     // Wait for next tick to ensure route is available
-    await nextTick()
-
-    // Let analytics system determine fromPage internally
-    analytics.trackPageVisit(pageName)
+    nextTick().then(() => {
+      // Let analytics system determine fromPage internally
+      analytics.trackPageVisit(pageName)
+    })
   })
 
   return analytics
