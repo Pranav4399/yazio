@@ -110,11 +110,17 @@ export const useWelcomeFlow = () => {
 
   // Auto-load profile, quiz responses, and feature flags on first access
   onMounted(async () => {
-    loading.value = true
-    await loadUserProfile()
-    await loadQuizResponses()
-    await loadFeatureFlags()
-    loading.value = false
+    try {
+      loading.value = true
+      await loadUserProfile()
+      await loadQuizResponses()
+      await loadFeatureFlags()
+    } catch (error) {
+      console.error('Error loading initial data:', error)
+      // Don't let initialization errors break the app
+    } finally {
+      loading.value = false
+    }
   })
 
   return {

@@ -302,16 +302,49 @@ export const useSupabaseAnalytics = (supabase: any) => {
 
 // Main composable that combines everything
 export const useSupabase = () => {
-  const config = useRuntimeConfig()
-  const supabase = createClient(config.public.supabase.url, config.public.supabase.anonKey)
+  try {
+    const config = useRuntimeConfig()
 
-  return {
-    supabase,
-    ...useSupabaseAuth(supabase),
-    profiles: useSupabaseProfiles(supabase),
-    quiz: useSupabaseQuiz(supabase),
-    quizResponses: useSupabaseQuizResponses(supabase),
-    featureFlags: useSupabaseFeatureFlags(supabase),
-    analytics: useSupabaseAnalytics(supabase)
+    if (!config.public.supabase?.url || !config.public.supabase?.anonKey) {
+      console.error('Supabase configuration missing. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.')
+      // Return a mock object to prevent crashes
+      return {
+        supabase: null,
+        login: () => ({ success: false, error: 'Supabase not configured' }),
+        isAuthenticated: () => false,
+        getCurrentUser: () => null,
+        profiles: { getUserProfile: () => null, updateUserProfile: () => false },
+        quiz: { getQuizQuestions: () => null },
+        quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
+        featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null },
+        analytics: { saveSessionEvent: () => {} }
+      }
+    }
+
+    const supabase = createClient(config.public.supabase.url, config.public.supabase.anonKey)
+
+    return {
+      supabase,
+      ...useSupabaseAuth(supabase),
+      profiles: useSupabaseProfiles(supabase),
+      quiz: useSupabaseQuiz(supabase),
+      quizResponses: useSupabaseQuizResponses(supabase),
+      featureFlags: useSupabaseFeatureFlags(supabase),
+      analytics: useSupabaseAnalytics(supabase)
+    }
+  } catch (error) {
+    console.error('Error initializing Supabase:', error)
+    // Return a mock object to prevent crashes
+    return {
+      supabase: null,
+      login: () => ({ success: false, error: 'Supabase initialization failed' }),
+      isAuthenticated: () => false,
+      getCurrentUser: () => null,
+      profiles: { getUserProfile: () => null, updateUserProfile: () => false },
+      quiz: { getQuizQuestions: () => null },
+      quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
+      featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null },
+      analytics: { saveSessionEvent: () => {} }
+    }
   }
 }

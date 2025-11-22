@@ -109,28 +109,33 @@ const trackPageVisit = (page: string, fromPage?: string) => {
 
 // Track generic events - save immediately to Supabase (fire-and-forget)
 const trackEvent = (event: string, page: string, data?: Record<string, any>) => {
-  const { analytics: supabaseAnalytics, getCurrentUser } = useSupabase()
-  const currentUser = getCurrentUser()
+  try {
+    const { analytics: supabaseAnalytics, getCurrentUser } = useSupabase()
+    const currentUser = getCurrentUser()
 
-  if (!currentUser) {
-    console.warn('Cannot track analytics event: User not authenticated')
-    return
+    if (!currentUser) {
+      console.warn('Cannot track analytics event: User not authenticated')
+      return
+    }
+
+    const analyticsEvent: AnalyticsEvent = {
+      event,
+      page,
+      timestamp: Date.now(),
+      data: data || {},
+      sessionId: sessionId.value,
+      userId: currentUser.id
+    }
+
+    // Save event immediately to Supabase (fire-and-forget - no await, no error handling)
+    supabaseAnalytics.saveSessionEvent(currentUser.id, sessionId.value, analyticsEvent)
+
+    // Keep local tracking for immediate access if needed
+    analyticsEvents.value.push(analyticsEvent)
+  } catch (error) {
+    // Silently fail - analytics shouldn't break the app
+    console.warn('Analytics tracking failed:', error)
   }
-
-  const analyticsEvent: AnalyticsEvent = {
-    event,
-    page,
-    timestamp: Date.now(),
-    data: data || {},
-    sessionId: sessionId.value,
-    userId: currentUser.id
-  }
-
-  // Save event immediately to Supabase (fire-and-forget - no await, no error handling)
-  supabaseAnalytics.saveSessionEvent(currentUser.id, sessionId.value, analyticsEvent)
-
-  // Keep local tracking for immediate access if needed
-  analyticsEvents.value.push(analyticsEvent)
 }
 
 // Track quiz answers
