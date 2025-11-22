@@ -2,12 +2,7 @@
   "version": 2,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": ".output",
-  "framework": null,
-  "functions": {
-    "pages/**/*.vue": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  "framework": "nuxtjs",
   "regions": ["fra1"],
   "env": {
     "NODE_ENV": "production"
