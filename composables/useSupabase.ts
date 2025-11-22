@@ -1,5 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Global Supabase client instance to avoid multiple instances
+let supabaseClient: any = null
+
+// Mock object for when Supabase is not available
+const createMockSupabase = (errorMessage: string) => ({
+  supabase: null,
+  login: () => ({ success: false, error: errorMessage }),
+  logout: () => {},
+  isAuthenticated: () => false,
+  getCurrentUser: () => null,
+  profiles: { getUserProfile: () => null, updateUserProfile: () => false },
+  quiz: { getQuizQuestions: () => null, updateQuizQuestions: () => false, deleteQuizQuestion: () => false },
+  quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
+  featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null, updateFeatureFlag: () => false },
+  analytics: { trackEvent: () => false, getUserAnalytics: () => null, saveSessionEvent: () => {} }
+})
+
 // Types matching our database schema
 export interface User {
   id: string
@@ -63,6 +80,7 @@ export const useSupabaseAuth = (supabase: any) => {
   const logout = () => {
     if (process.client) {
       localStorage.removeItem('user')
+      sessionStorage.removeItem('yazio_session_id') // Clear analytics session on logout
     }
   }
 
@@ -131,8 +149,55 @@ export const useSupabaseQuiz = (supabase: any) => {
     return data.questions
   }
 
+  const updateQuizQuestions = async (questions: any[]): Promise<boolean> => {
+    try {
+      // First get the existing quiz questions record ID
+      const { data: existingRecord, error: selectError } = await supabase
+        .from('quiz_questions')
+        .select('id')
+        .limit(1)
+        .single()
+
+      if (selectError || !existingRecord) {
+        console.error('Error finding quiz questions record:', selectError)
+        return false
+      }
+
+      // Update the specific record
+      const { error: updateError } = await supabase
+        .from('quiz_questions')
+        .update({ questions, updated_at: new Date().toISOString() })
+        .eq('id', existingRecord.id)
+
+      if (updateError) {
+        console.error('Error updating quiz questions:', updateError)
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error('Unexpected error updating quiz questions:', error)
+      return false
+    }
+  }
+
+  const deleteQuizQuestion = async (questionId: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('quiz_questions')
+      .delete()
+      .eq('id', questionId)
+
+    if (error) {
+      console.error('Error deleting quiz question:', error)
+      return false
+    }
+    return true
+  }
+
+
   return {
-    getQuizQuestions
+    getQuizQuestions,
+    updateQuizQuestions,
+    deleteQuizQuestion
   }
 }
 
@@ -150,24 +215,34 @@ export const useSupabaseFeatureFlags = (supabase: any) => {
     return data.value
   }
 
-  const getAllFeatureFlags = async (): Promise<Record<string, string> | null> => {
+  const getAllFeatureFlags = async (): Promise<Record<string, boolean>[] | null> => {
     const { data, error } = await supabase
       .from('feature_flags')
       .select('key, value')
 
     if (error) return null
 
-    const flags: Record<string, string> = {}
-    data.forEach((flag: any) => {
-      flags[flag.key] = flag.value
-    })
+    const flags = await data;
+    return flags;
+  }
 
-    return flags
+  const updateFeatureFlag = async (key: string, value: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('feature_flags')
+      .update({ value, updated_at: new Date().toISOString() })
+      .eq('key', key)
+
+    if (error) {
+      console.error('Error updating feature flag:', error)
+      return false
+    }
+    return true
   }
 
   return {
     getFeatureFlag,
-    getAllFeatureFlags
+    getAllFeatureFlags,
+    updateFeatureFlag
   }
 }
 
@@ -238,35 +313,45 @@ export const useSupabaseAnalytics = (supabase: any) => {
   }
 
   const saveSessionEvent = (userId: string, sessionId: string, event: any): void => {
-    // Fire-and-forget: Don't await, don't handle errors
-    // This prevents blocking UI for analytics
+    // Fire-and-forget for performance, but with better session handling
     supabase
       .from('analytics')
       .select('id, data')
       .eq('user_id', userId)
       .eq('data->>sessionId', sessionId)
-      .maybeSingle()
-      .then(({ data: existing, error: selectError }: any) => {
-        const sessionData = {
-          sessionId,
-          events: [event],
-          startedAt: event.timestamp,
-          lastUpdated: Date.now()
+      .limit(1)
+      .then(({ data: existingRecords, error: selectError }: any) => {
+        if (selectError) {
+          console.warn('❌ Error querying analytics:', selectError)
+          return
         }
 
-        if (existing && !selectError) {
-          // Session exists, add to existing events
-          const existingEvents = existing.data?.events || []
-          sessionData.events = [...existingEvents, event]
-          sessionData.startedAt = existing.data?.startedAt || event.timestamp
+        const existing = existingRecords?.[0]
 
-          // Update existing record
+        if (existing) {
+          // Session exists, update it by adding the new event
+          const existingData = existing.data || {}
+          const existingEvents = Array.isArray(existingData.events) ? existingData.events : []
+
+          const updatedData = {
+            ...existingData,
+            events: [...existingEvents, event],
+            lastUpdated: Date.now()
+          }
+
           return supabase
             .from('analytics')
-            .update({ data: sessionData })
+            .update({ data: updatedData })
             .eq('id', existing.id)
         } else {
           // Create new session record
+          const sessionData = {
+            sessionId,
+            events: [event],
+            startedAt: event.timestamp,
+            lastUpdated: Date.now()
+          }
+
           return supabase
             .from('analytics')
             .insert([{
@@ -275,9 +360,14 @@ export const useSupabaseAnalytics = (supabase: any) => {
             }])
         }
       })
+      .then(({ error }: any) => {
+        if (error) {
+          console.warn('❌ Analytics save error:', error)
+        }
+      })
       .catch((error: any) => {
         // Silently fail - analytics shouldn't break the app
-        console.warn('Analytics save failed (non-critical):', error)
+        console.warn('❌ Analytics save failed (non-critical):', error)
       })
   }
 
@@ -305,44 +395,25 @@ export const useSupabase = () => {
   try {
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
       console.error('Supabase configuration missing. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.')
-      // Return a mock object to prevent crashes
-      return {
-        supabase: null,
-        login: () => ({ success: false, error: 'Supabase not configured' }),
-        isAuthenticated: () => false,
-        getCurrentUser: () => null,
-        profiles: { getUserProfile: () => null, updateUserProfile: () => false },
-        quiz: { getQuizQuestions: () => null },
-        quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
-        featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null },
-        analytics: { saveSessionEvent: () => {} }
-      }
+      return createMockSupabase('Supabase not configured')
     }
 
-    const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY)
+    // Use global client instance to avoid multiple GoTrueClient instances
+    if (!supabaseClient) {
+      supabaseClient = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY)
+    }
 
     return {
-      supabase,
-      ...useSupabaseAuth(supabase),
-      profiles: useSupabaseProfiles(supabase),
-      quiz: useSupabaseQuiz(supabase),
-      quizResponses: useSupabaseQuizResponses(supabase),
-      featureFlags: useSupabaseFeatureFlags(supabase),
-      analytics: useSupabaseAnalytics(supabase)
+      supabase: supabaseClient,
+      ...useSupabaseAuth(supabaseClient),
+      profiles: useSupabaseProfiles(supabaseClient),
+      quiz: useSupabaseQuiz(supabaseClient),
+      quizResponses: useSupabaseQuizResponses(supabaseClient),
+      featureFlags: useSupabaseFeatureFlags(supabaseClient),
+      analytics: useSupabaseAnalytics(supabaseClient)
     }
   } catch (error) {
     console.error('Error initializing Supabase:', error)
-    // Return a mock object to prevent crashes
-    return {
-      supabase: null,
-      login: () => ({ success: false, error: 'Supabase initialization failed' }),
-      isAuthenticated: () => false,
-      getCurrentUser: () => null,
-      profiles: { getUserProfile: () => null, updateUserProfile: () => false },
-      quiz: { getQuizQuestions: () => null },
-      quizResponses: { saveQuizResponse: () => false, getUserQuizResponses: () => null },
-      featureFlags: { getFeatureFlag: () => null, getAllFeatureFlags: () => null },
-      analytics: { saveSessionEvent: () => {} }
-    }
+    return createMockSupabase('Supabase initialization failed')
   }
 }

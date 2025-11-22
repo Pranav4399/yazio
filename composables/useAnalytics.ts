@@ -46,8 +46,15 @@ const generateSessionId = (): string => {
 
 // Initialize session
 const initSession = () => {
-  if (!sessionId.value) {
-    sessionId.value = generateSessionId()
+  if (process.client) {
+    const storedSessionId = sessionStorage.getItem('yazio_session_id')
+    if (storedSessionId) {
+      sessionId.value = storedSessionId
+    } else {
+      const newSessionId = generateSessionId()
+      sessionId.value = newSessionId
+      sessionStorage.setItem('yazio_session_id', newSessionId)
+    }
   }
 }
 
@@ -103,8 +110,10 @@ const trackPageVisit = (page: string, fromPage?: string) => {
 
   pageVisits.value.push(visit)
 
-  // Track page visit event (fire-and-forget)
-  trackEvent('page_visit', page, { fromPage: actualFromPage })
+  // Track page visit event (fire-and-forget) - skip login page
+  if (page !== '/') {
+    trackEvent('page_visit', page, { fromPage: actualFromPage })
+  }
 }
 
 // Track generic events - save immediately to Supabase (fire-and-forget)

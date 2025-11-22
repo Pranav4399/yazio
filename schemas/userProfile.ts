@@ -6,34 +6,19 @@ export interface UserProfile {
   timeCommitment?: '15min' | '30min' | '1hour' | 'flexible'
 }
 
-// Form field configuration
-export interface FormField {
-  key: keyof UserProfile
-  label: string
-  type: 'text' | 'select'
-  required: boolean
-  options?: FormOption[]
-  placeholder?: string
-}
-
-export interface FormOption {
-  value: string
-  label: string
-}
-
-// Dynamic form schema
-export const USER_PROFILE_FORM: FormField[] = [
+// Form configuration - used by goal.vue page
+export const USER_PROFILE_FORM = [
   {
-    key: 'name',
+    key: 'name' as keyof UserProfile,
     label: 'Name',
-    type: 'text',
+    type: 'text' as const,
     required: true,
     placeholder: 'Enter your name'
   },
   {
-    key: 'goal',
+    key: 'goal' as keyof UserProfile,
     label: 'Fitness Goal',
-    type: 'select',
+    type: 'select' as const,
     required: true,
     options: [
       { value: 'lose-weight', label: 'Lose weight' },
@@ -44,9 +29,9 @@ export const USER_PROFILE_FORM: FormField[] = [
     ]
   },
   {
-    key: 'dietaryPreference',
+    key: 'dietaryPreference' as keyof UserProfile,
     label: 'Eating Style',
-    type: 'select',
+    type: 'select' as const,
     required: false,
     options: [
       { value: '', label: 'No preference' },
@@ -57,9 +42,9 @@ export const USER_PROFILE_FORM: FormField[] = [
     ]
   },
   {
-    key: 'timeCommitment',
+    key: 'timeCommitment' as keyof UserProfile,
     label: 'Time Available',
-    type: 'select',
+    type: 'select' as const,
     required: false,
     options: [
       { value: '', label: 'No preference' },

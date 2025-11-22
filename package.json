@@ -30,6 +30,7 @@
     "@vueuse/core": "^14.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.4.1",
+    "vue-echarts": "^6.7.3",
     "zod": "^4.1.12"
   }
 }

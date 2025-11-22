@@ -1,14 +1,16 @@
 <template>
   <div id="app">
-    <!-- Header with logout button -->
-    <header v-if="isAuthenticated()" class="app-header">
-      <div class="header-content">
-        <div class="spacer"></div>
-        <button @click="handleLogout" class="logout-button">
-          Logout
-        </button>
-      </div>
-    </header>
+    <!-- Header with logout button - client-only to avoid hydration mismatch -->
+    <ClientOnly>
+      <header v-if="isAuthenticated()" class="app-header">
+        <div class="header-content">
+          <div class="spacer"></div>
+          <button @click="handleLogout" class="logout-button">
+            Logout
+          </button>
+        </div>
+      </header>
+    </ClientOnly>
 
     <NuxtPage />
   </div>
@@ -36,7 +38,6 @@ const handleLogout = () => {
 <style>
 #app {
   min-height: 100vh;
-  padding-top: 4rem; /* Account for fixed header */
 }
 
 .app-header {

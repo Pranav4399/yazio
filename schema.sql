@@ -28,7 +28,8 @@ CREATE TABLE user_profiles (
 CREATE TABLE quiz_questions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   questions JSONB NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Analytics table
@@ -82,6 +83,7 @@ CREATE POLICY "User profiles are readable" ON user_profiles FOR SELECT USING (tr
 CREATE POLICY "User profiles are updatable" ON user_profiles FOR UPDATE USING (true);
 
 CREATE POLICY "Quiz questions are readable" ON quiz_questions FOR SELECT USING (true);
+CREATE POLICY "Quiz questions are updatable" ON quiz_questions FOR UPDATE USING (true);
 
 CREATE POLICY "Quiz responses are insertable" ON quiz_responses FOR INSERT WITH CHECK (true);
 CREATE POLICY "Quiz responses are readable" ON quiz_responses FOR SELECT USING (true);
@@ -92,6 +94,7 @@ CREATE POLICY "Analytics data is updatable" ON analytics FOR UPDATE USING (true)
 CREATE POLICY "Analytics data is readable" ON analytics FOR SELECT USING (true);
 
 CREATE POLICY "Feature flags are readable" ON feature_flags FOR SELECT USING (true);
+CREATE POLICY "Feature flags are updatable" ON feature_flags FOR UPDATE USING (true);
 
 -- Insert test users for development (same password for all)
 INSERT INTO users (username, password) VALUES
