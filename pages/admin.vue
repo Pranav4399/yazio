@@ -156,7 +156,7 @@ const loadFeatureFlags = async () => {
 }
 
 // Update feature flag
-const updateFeatureFlag = async (flag: any, stringValue: string) => {
+const updateFeatureFlag = async (flag: { id: string, key: string, value: string }, stringValue: string) => {
   try {
     updatingFlags.value.add(flag.id)
     errorMessage.value = ''

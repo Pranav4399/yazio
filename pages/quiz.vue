@@ -108,7 +108,7 @@ import { usePageAnalytics } from '~/composables/useAnalytics'
 import { useSupabase } from '~/composables/useSupabase'
 import { useQuizManagement, useWelcomeFlow } from '~/composables/useWelcomeFlow'
 import { PROGRESS_STEPS } from '~/schemas/common'
-import type { QuestionId } from '~/schemas/quiz'
+import type { QuestionId, QuizAnswer, QuizQuestion } from '~/schemas/quiz'
 import '~/styles/quiz.css'
 
 const progressSteps = PROGRESS_STEPS
@@ -121,7 +121,7 @@ const { quiz, quizResponses: quizDb, getCurrentUser } = useSupabase()
 const { quizResponses, addQuizAnswer, completeQuiz } = useQuizManagement()
 const { featureFlags } = useWelcomeFlow()
 
-const questions = ref<any[]>([])
+const questions = ref<QuizQuestion[]>([])
 const currentQuestionIndex = ref(0)
 const selectedAnswer = ref('')
 const questionStartTime = ref<number>(0)
@@ -151,7 +151,7 @@ const loadExistingAnswer = (questionIndex: number) => {
   if (!questions.value[questionIndex]) return
 
   const questionId = questions.value[questionIndex].id
-  const existingAnswer = quizResponses.value.answers.find((a: any) => a.questionId === questionId)
+  const existingAnswer = quizResponses.value.answers.find((a: QuizAnswer) => a.questionId === questionId)
 
   if (existingAnswer && !existingAnswer.skipped) {
     selectedAnswer.value = existingAnswer.answer
@@ -204,7 +204,7 @@ const proceedToNext = () => {
   if (isLastQuestion.value) {
     completeQuiz()
     // Check feature flag for branding page
-    const brandingFlag = featureFlags.value.find((f: any) => f.key === 'show-branding')?.value === 'true'
+    const brandingFlag = featureFlags.value.find((f: { key: string, value: string }) => f.key === 'show-branding')?.value === 'true'
     navigateTo(brandingFlag ? '/branding' : '/summary')
   } else {
     currentQuestionIndex.value++

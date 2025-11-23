@@ -1,7 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type PostgrestSingleResponse, type SupabaseClient } from '@supabase/supabase-js'
+import type { QuizQuestion } from '~/schemas/quiz'
 
 // Global Supabase client instance to avoid multiple instances
-let supabaseClient: any = null
+let supabaseClient: SupabaseClient | null = null
 
 // Mock object for when Supabase is not available
 const createMockSupabase = (errorMessage: string) => ({
@@ -38,7 +39,7 @@ export interface UserProfile {
 
 export interface QuizQuestions {
   id: string
-  questions: any[]
+  questions: QuizQuestion[]
   created_at: string
 }
 
@@ -56,7 +57,7 @@ export interface DatabaseAnalyticsEvent {
 }
 
 // Authentication functions
-export const useSupabaseAuth = (supabase: any) => {
+export const useSupabaseAuth = (supabase: SupabaseClient) => {
 
   const login = async (username: string, password: string) => {
     const { data, error } = await supabase
@@ -103,7 +104,7 @@ export const useSupabaseAuth = (supabase: any) => {
 }
 
 // User profile functions
-export const useSupabaseProfiles = (supabase: any) => {
+export const useSupabaseProfiles = (supabase: SupabaseClient) => {
 
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
     const { data, error } = await supabase
@@ -136,9 +137,9 @@ export const useSupabaseProfiles = (supabase: any) => {
 }
 
 // Quiz functions
-export const useSupabaseQuiz = (supabase: any) => {
+export const useSupabaseQuiz = (supabase: SupabaseClient) => {
 
-  const getQuizQuestions = async (): Promise<any[] | null> => {
+  const getQuizQuestions = async (): Promise<QuizQuestion[] | null> => {
     const { data, error } = await supabase
       .from('quiz_questions')
       .select('questions')
@@ -148,7 +149,7 @@ export const useSupabaseQuiz = (supabase: any) => {
     return data.questions
   }
 
-  const updateQuizQuestions = async (questions: any[]): Promise<boolean> => {
+  const updateQuizQuestions = async (questions: QuizQuestion[]): Promise<boolean> => {
     try {
       // First get the existing quiz questions record ID
       const { data: existingRecord, error: selectError } = await supabase
@@ -201,7 +202,7 @@ export const useSupabaseQuiz = (supabase: any) => {
 }
 
 // Feature flags functions
-export const useSupabaseFeatureFlags = (supabase: any) => {
+export const useSupabaseFeatureFlags = (supabase: SupabaseClient) => {
 
   const getAllFeatureFlags = async (): Promise<{ key: string; value: string }[] | null> => {
     const { data, error } = await supabase
@@ -234,7 +235,7 @@ export const useSupabaseFeatureFlags = (supabase: any) => {
 }
 
 // Quiz responses functions
-export const useSupabaseQuizResponses = (supabase: any) => {
+export const useSupabaseQuizResponses = (supabase: SupabaseClient) => {
 
   const saveQuizResponse = async (
     userId: string,
@@ -289,7 +290,7 @@ export const useSupabaseQuizResponses = (supabase: any) => {
 }
 
 // Analytics functions (page views, general events only)
-export const useSupabaseAnalytics = (supabase: any) => {
+export const useSupabaseAnalytics = (supabase: SupabaseClient) => {
 
   const trackEvent = async (eventData: DatabaseAnalyticsEvent): Promise<boolean> => {
     const { error } = await supabase
@@ -299,7 +300,7 @@ export const useSupabaseAnalytics = (supabase: any) => {
     return !error
   }
 
-  const saveSessionEvent = (userId: string, sessionId: string, event: any): void => {
+  const saveSessionEvent = (userId: string, sessionId: string, event: DatabaseAnalyticsEvent): void => {
     // Fire-and-forget for performance, but with better session handling
     supabase
       .from('analytics')
@@ -335,7 +336,7 @@ export const useSupabaseAnalytics = (supabase: any) => {
           const sessionData = {
             sessionId,
             events: [event],
-            startedAt: event.timestamp,
+            startedAt: new Date().toISOString(),
             lastUpdated: Date.now()
           }
 
@@ -347,18 +348,14 @@ export const useSupabaseAnalytics = (supabase: any) => {
             }])
         }
       })
-      .then(({ error }: any) => {
-        if (error) {
-          console.warn('❌ Analytics save error:', error)
+      .then((result: PostgrestSingleResponse<null> | undefined) => {
+        if (result && result.error) {
+          console.warn('❌ Analytics save error:', result.error)
         }
-      })
-      .catch((error: any) => {
-        // Silently fail - analytics shouldn't break the app
-        console.warn('❌ Analytics save failed (non-critical):', error)
       })
   }
 
-  const getUserAnalytics = async (userId: string, limit = 100): Promise<any[] | null> => {
+  const getUserAnalytics = async (userId: string, limit = 100): Promise<DatabaseAnalyticsEvent[] | null> => {
     const { data, error } = await supabase
       .from('analytics')
       .select('*')

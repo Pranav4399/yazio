@@ -50,7 +50,7 @@ definePageMeta({
 const { featureFlags } = useWelcomeFlow();
 
 const welcomeFlag = computed(() => {
-  const flag = featureFlags.value.find((f: any) => f.key === 'welcome-message')
+  const flag = featureFlags.value.find((f: { key: string, value: string }) => f.key === 'welcome-message')
   return flag?.value === 'true'
 })
 
