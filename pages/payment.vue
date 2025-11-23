@@ -37,10 +37,82 @@
 
         <!-- Challenge-Specific Motivation -->
         <div class="conditional-message" v-if="userBiggestChallenge === 'busy-schedule'">
-          <p>Our quick-prep recipes are designed for your busy lifestyle.</p>
+          <p class="message-title">Here's a quick recipe as a token of appreciation for the great habits you've built till now - this one's quite popular in our app!</p>
+          <div class="recipe-preview">
+            <div class="recipe-header">
+              <h4>15-Minute Chicken Stir-Fry</h4>
+              <button
+                @click="toggleRecipe('stir-fry')"
+                class="recipe-toggle"
+              >
+                {{ isRecipeExpanded('stir-fry') ? 'Hide Recipe' : 'Show Recipe' }}
+              </button>
+            </div>
+            <div
+              class="recipe-details"
+              :class="{ expanded: isRecipeExpanded('stir-fry') }"
+            >
+              <div class="ingredients">
+                <strong>Ingredients:</strong>
+                <ul>
+                  <li>200g chicken breast, sliced</li>
+                  <li>2 cups mixed vegetables (broccoli, bell peppers, carrots)</li>
+                  <li>2 tbsp low-sodium soy sauce</li>
+                  <li>1 tbsp olive oil</li>
+                  <li>1 tsp ginger, minced</li>
+                </ul>
+              </div>
+              <div class="method">
+                <strong>Method:</strong>
+                <ol>
+                  <li>Heat oil in a wok or large pan over medium-high heat</li>
+                  <li>Add chicken and stir-fry for 5 minutes until cooked</li>
+                  <li>Add vegetables and ginger, stir-fry for 3-4 minutes</li>
+                  <li>Add soy sauce and cook for 2 more minutes</li>
+                  <li>Serve immediately</li>
+                </ol>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="conditional-message" v-else-if="userBiggestChallenge === 'cravings'">
-          <p>Healthy alternatives can satisfy cravings while supporting your goals.</p>
+          <p class="message-title">Cravings happen to everyone - even the most disciplined eaters. Try this healthier alternative that satisfies your sweet tooth:</p>
+          <div class="recipe-preview">
+            <div class="recipe-header">
+              <h4>Dark Chocolate Avocado Mousse</h4>
+              <button
+                @click="toggleRecipe('mousse')"
+                class="recipe-toggle"
+              >
+                {{ isRecipeExpanded('mousse') ? 'Hide Recipe' : 'Show Recipe' }}
+              </button>
+            </div>
+            <div
+              class="recipe-details"
+              :class="{ expanded: isRecipeExpanded('mousse') }"
+            >
+              <div class="ingredients">
+                <strong>Ingredients:</strong>
+                <ul>
+                  <li>1 ripe avocado</li>
+                  <li>3 tbsp unsweetened cocoa powder</li>
+                  <li>2 tbsp maple syrup or honey</li>
+                  <li>1 tsp vanilla extract</li>
+                  <li>Pinch of salt</li>
+                </ul>
+              </div>
+              <div class="method">
+                <strong>Method:</strong>
+                <ol>
+                  <li>Scoop avocado into a blender or food processor</li>
+                  <li>Add cocoa powder, sweetener, vanilla, and salt</li>
+                  <li>Blend until smooth and creamy (about 1-2 minutes)</li>
+                  <li>Chill for 15-30 minutes before serving</li>
+                  <li>Enjoy with fresh berries on top</li>
+                </ol>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Time Commitment Acknowledgment -->
@@ -177,6 +249,7 @@ const currentVariant = computed(() => PAYWALL_VARIANTS[selectedVariant.value]);
 // Reactive data
 const selectedPlan = ref<string>("");
 const isProcessing = ref(false);
+const expandedRecipes = ref<string[]>([]);
 
 const paymentData = ref({
   cardNumber: "",
@@ -234,6 +307,19 @@ const selectPlan = (plan: string) => {
 
 const goToPreviousPage = () => {
   navigateTo("/summary");
+};
+
+const toggleRecipe = (recipeId: string) => {
+  const index = expandedRecipes.value.indexOf(recipeId);
+  if (index > -1) {
+    expandedRecipes.value.splice(index, 1);
+  } else {
+    expandedRecipes.value.push(recipeId);
+  }
+};
+
+const isRecipeExpanded = (recipeId: string) => {
+  return expandedRecipes.value.includes(recipeId);
 };
 
 const formatCardNumber = (value: string) => {

@@ -64,3 +64,26 @@ For users who benefit from clear guidance and organization:
 
 ### Default Variant (C)
 For all other users - balanced approach with general benefits
+
+## Personalized Payment Experience
+
+The payment page includes intelligent personalization that adapts based on user data:
+
+### Goal-Based Messages
+- **Weight Loss**: "Every successful weight loss journey starts with consistency over perfection"
+- **Muscle Building**: "Fueling your body right is the foundation of building strength"
+- **Weight Maintenance**: "Healthy maintenance is about balance and enjoying the foods you love"
+
+### Discipline Level Support
+For users who indicated lower discipline in morning routines:
+- "Remember: progress happens one positive choice at a time"
+
+### Challenge-Specific Content
+- **Busy Schedule**: Complete 15-minute Chicken Stir-Fry recipe with collapsible details
+- **Cravings**: Dark Chocolate Avocado Mousse recipe as a healthy alternative
+
+### Time Commitment Acknowledgment
+- **15 minutes**: "Perfect - our 15-minute meal ideas will fit seamlessly into your routine"
+- **30 minutes**: "Our 30-minute recipes balance nutrition with your available time"
+
+Recipes are presented in collapsible format to keep the page focused while providing immediate value.
