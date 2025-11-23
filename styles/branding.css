@@ -1,15 +1,18 @@
 .branding-container {
   min-height: 100vh;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'pnum' 1, 'tnum' 0, 'onum' 1, 'lnum' 0, 'dlig' 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .branding-content {
-  max-width: 600px;
+  max-width: 800px;
   width: 100%;
   text-align: center;
   animation: fadeIn 0.8s ease-out;
@@ -18,102 +21,122 @@
 .progress-wrapper {
   width: 100%;
   max-width: 400px;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .branding-header {
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .logo-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  position: relative;
 }
 
 .logo {
-  font-size: 3rem;
-  font-weight: 700;
+  font-size: 3.5rem;
+  font-weight: 800;
   color: #000000;
-  letter-spacing: -0.05em;
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.06em;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #000000 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .tagline {
   font-size: 1.125rem;
   color: #6b7280;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  opacity: 0.9;
 }
 
 .message-section {
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.25rem;
+  font-weight: 700;
   color: #111827;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   line-height: 1.2;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
   font-size: 1.125rem;
-  color: #6b7280;
-  line-height: 1.6;
-  max-width: 500px;
+  color: #475569;
+  line-height: 1.7;
+  max-width: 580px;
   margin: 0 auto;
+  font-weight: 400;
 }
 
 .features-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .feature {
-  padding: 1.5rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  padding: 2rem 1.75rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-.feature-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.feature:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
 }
 
 .feature h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.875rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .feature p {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 400;
 }
 
 .continue-button {
   background: #000000;
   color: #ffffff;
   border: none;
-  padding: 0.875rem 2rem;
-  border-radius: 0.5rem;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: -0.01em;
-  min-width: 160px;
+  transition: all 0.25s ease;
+  letter-spacing: -0.005em;
+  min-width: 180px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .continue-button:hover {
   background: #1f2937;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .continue-button:active {
@@ -134,23 +157,34 @@
 
 @media (max-width: 640px) {
   .branding-container {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
   .logo {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
   }
 
   .title {
-    font-size: 1.75rem;
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    padding: 0 1rem;
   }
 
   .features-section {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    max-width: none;
   }
 
   .feature {
-    padding: 1.25rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .continue-button {
+    width: 100%;
+    max-width: 320px;
   }
 }

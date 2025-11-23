@@ -7,29 +7,30 @@
       <div class="branding-header">
         <div class="logo-section">
           <div class="logo">YAZIO</div>
-          <div class="tagline">Your AI Fitness Companion</div>
+          <div class="tagline">Smart Nutrition Tracking</div>
         </div>
 
         <div class="message-section">
-          <h1 class="title">Thank you for choosing YAZIO</h1>
-          <p class="subtitle">We're excited to help you on your fitness journey with personalized nutrition and workout plans powered by AI.</p>
+          <h1 class="title">Welcome to YAZIO</h1>
+          <p class="subtitle">YAZIO is your intelligent nutrition companion that helps you track calories, understand your eating patterns, and make informed decisions about your health. Since 2016, we've helped millions of users worldwide achieve their nutrition goals.</p>
         </div>
 
         <div class="features-section">
           <div class="feature">
-            <div class="feature-icon">🎯</div>
-            <h3>Personalized Plans</h3>
-            <p>AI-powered meal and workout recommendations tailored to your goals</p>
+            <h3>Calorie Tracking</h3>
+            <p>Log meals and track calories with our extensive food database</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">📊</div>
-            <h3>Smart Tracking</h3>
-            <p>Advanced analytics to monitor your progress and keep you motivated</p>
+            <h3>Progress Insights</h3>
+            <p>Understand your eating patterns with detailed analytics and reports</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🏆</div>
-            <h3>Achieve Goals</h3>
-            <p>Reach your fitness targets with our proven methodology</p>
+            <h3>Goal Achievement</h3>
+            <p>Set targets and stay motivated with personalized recommendations</p>
+          </div>
+          <div class="feature">
+            <h3>Community Support</h3>
+            <p>Join a community of health-conscious individuals sharing their journeys</p>
           </div>
         </div>
       </div>

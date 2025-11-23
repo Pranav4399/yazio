@@ -75,18 +75,12 @@
           </button>
           <div class="action-buttons">
             <button
-              v-if="!currentQuestion.required && !isLastQuestion"
+              v-if="!isLastQuestion"
               @click="handleNext"
               class="next-button"
+              :disabled="currentQuestion.required && !selectedAnswer"
             >
               Next
-            </button>
-            <button
-              v-if="!currentQuestion.required && !isLastQuestion"
-              @click="skipQuestion"
-              class="skip-button"
-            >
-              Skip
             </button>
             <button
               v-if="isLastQuestion"
@@ -178,56 +172,33 @@ const selectOption = (optionId: string) => {
 }
 
 const handleNext = async () => {
-  if (!selectedAnswer.value) return
+  // If question is required and no answer, don't proceed
+  if (currentQuestion.value.required && !selectedAnswer.value) return
 
   const timeSpent = Date.now() - questionStartTime.value
   const userId = getCurrentUser()?.id
+  const isSkipped = !selectedAnswer.value && !currentQuestion.value.required
 
   // Save to quiz_responses table
   if (userId) {
     await quizDb.saveQuizResponse(
       userId,
       currentQuestion.value.id,
-      selectedAnswer.value,
-      false,
+      selectedAnswer.value || '',
+      isSkipped,
       Math.round(timeSpent / 1000) // Convert milliseconds to seconds
     )
   }
 
   addQuizAnswer({
     questionId: currentQuestion.value.id as QuestionId,
-    answer: selectedAnswer.value,
-    skipped: false
+    answer: selectedAnswer.value || '',
+    skipped: isSkipped
   })
 
   proceedToNext()
 }
 
-const skipQuestion = async () => {
-  const timeSpent = Date.now() - questionStartTime.value
-  const userId = getCurrentUser()?.id
-
-  // Save to quiz_responses table
-  if (userId) {
-    await quizDb.saveQuizResponse(
-      userId,
-      currentQuestion.value.id,
-      '',
-      true,
-      Math.round(timeSpent / 1000) // Convert milliseconds to seconds
-    )
-  }
-
-  addQuizAnswer({
-    questionId: currentQuestion.value.id as QuestionId,
-    answer: '',
-    skipped: true
-  })
-
-  analytics.trackInteraction('click', 'skip_button', { questionIndex: currentQuestionIndex.value })
-
-  proceedToNext()
-}
 
 const proceedToNext = () => {
   if (isLastQuestion.value) {

@@ -34,7 +34,6 @@ export const USER_PROFILE_FORM = [
     type: 'select' as const,
     required: false,
     options: [
-      { value: '', label: 'No preference' },
       { value: 'balanced', label: 'Balanced meals' },
       { value: 'quick-recipes', label: 'Quick recipes' },
       { value: 'meal-prep', label: 'Meal prep friendly' },
@@ -47,7 +46,6 @@ export const USER_PROFILE_FORM = [
     type: 'select' as const,
     required: false,
     options: [
-      { value: '', label: 'No preference' },
       { value: '15min', label: '15 minutes or less' },
       { value: '30min', label: '30 minutes' },
       { value: '1hour', label: '1 hour or more' },
