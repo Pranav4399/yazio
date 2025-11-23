@@ -1,5 +1,7 @@
 # Yazio Welcome Back Funnel
 
+📋 **[Comprehensive Documentation](https://docs.google.com/document/d/1EfSE_YZCs8mLsP0JpjJMZLPGBT78M-JU_T7XxBoGZHI/edit?usp=sharing)** - Detailed technical documentation, architecture, and implementation guide.
+
 ## Setup
 
 1. **Install dependencies:**
