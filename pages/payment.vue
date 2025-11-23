@@ -12,63 +12,75 @@
         <p class="subtitle">{{ currentVariant.subheadline }}</p>
       </div>
 
-      <!-- Trial Notice -->
-      <div class="trial-notice">
-        <div class="trial-icon">🎁</div>
-        <div class="trial-text">
-          <strong>7-day free trial</strong> - No charges until
-          {{ trialEndDate }}
-        </div>
+      <!-- Personalized Message -->
+      <div class="personal-message">
+        <p>Based on what you've shared, we think you'll love our approach to making healthy eating feel natural and achievable.</p>
       </div>
 
+      <!-- Conditional Personalized Sections -->
+      <div class="personalized-sections">
+        <!-- Goal-Specific Encouragement -->
+        <div class="conditional-message" v-if="userProfile?.goal === 'lose-weight'">
+          <p>Every successful weight loss journey starts with consistency over perfection.</p>
+        </div>
+        <div class="conditional-message" v-else-if="userProfile?.goal === 'build-muscle'">
+          <p>Fueling your body right is the foundation of building strength.</p>
+        </div>
+        <div class="conditional-message" v-else-if="userProfile?.goal === 'maintain-weight'">
+          <p>Healthy maintenance is about balance and enjoying the foods you love.</p>
+        </div>
+
+        <!-- Discipline Level Support -->
+        <div class="conditional-message" v-if="isLowDisciplineUser">
+          <p>Remember: progress happens one positive choice at a time.</p>
+        </div>
+
+        <!-- Challenge-Specific Motivation -->
+        <div class="conditional-message" v-if="userBiggestChallenge === 'busy-schedule'">
+          <p>Our quick-prep recipes are designed for your busy lifestyle.</p>
+        </div>
+        <div class="conditional-message" v-else-if="userBiggestChallenge === 'cravings'">
+          <p>Healthy alternatives can satisfy cravings while supporting your goals.</p>
+        </div>
+
+        <!-- Time Commitment Acknowledgment -->
+        <div class="conditional-message" v-if="userProfile?.timeCommitment === '15min'">
+          <p>Perfect - our 15-minute meal ideas will fit seamlessly into your routine.</p>
+        </div>
+        <div class="conditional-message" v-else-if="userProfile?.timeCommitment === '30min'">
+          <p>Our 30-minute recipes balance nutrition with your available time.</p>
+        </div>
+      </div>
+      
       <!-- Plan Selection -->
       <div class="plans-section">
-        <!-- Premium Plan - Featured -->
+        <!-- Premium Plan -->
         <div
           class="plan-card premium"
           :class="{ selected: selectedPlan === 'premium' }"
         >
-          <div class="plan-ribbon">Most Popular</div>
           <div class="plan-header">
             <h3 class="plan-name">Premium Plan</h3>
             <div class="plan-price">
-              <div class="original-price">$19.99</div>
-              <div class="discounted-price">
-                <span class="price">$9.99</span>
-                <span class="period">/month</span>
-              </div>
-              <div class="savings">Save 50%</div>
+              <span class="price">$9.99</span>
+              <span class="period">/month</span>
             </div>
           </div>
 
-          <div class="plan-features">
-            <div
-              v-for="benefit in currentVariant.benefits"
-              :key="benefit"
-              class="feature"
-            >
-              <span class="check">✓</span>
-              <span>{{ benefit }}</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Expert nutrition guidance</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>24/7 support</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Cancel anytime</span>
-            </div>
+          <div class="plan-benefits">
+            <p class="benefit-intro">Everything you need to succeed:</p>
+            <ul>
+              <li v-for="benefit in currentVariant.benefits" :key="benefit">
+                {{ benefit }}
+              </li>
+            </ul>
           </div>
 
           <button
             @click="selectPlan('premium')"
             class="select-plan-button primary"
           >
-            Start Premium Trial
+            {{ currentVariant.cta }}
           </button>
         </div>
 
@@ -80,37 +92,26 @@
           <div class="plan-header">
             <h3 class="plan-name">Basic Plan</h3>
             <div class="plan-price">
-              <div class="discounted-price">
-                <span class="price">$4.99</span>
-                <span class="period">/month</span>
-              </div>
+              <span class="price">$4.99</span>
+              <span class="period">/month</span>
             </div>
           </div>
 
-          <div class="plan-features">
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Basic meal tracking</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Simple progress charts</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Email support</span>
-            </div>
-            <div class="feature">
-              <span class="check">✓</span>
-              <span>Cancel anytime</span>
-            </div>
+          <div class="plan-benefits">
+            <p class="benefit-intro">A simpler start:</p>
+            <ul>
+              <li>Essential meal tracking</li>
+              <li>Basic progress insights</li>
+              <li>Email support</li>
+              <li>Cancel anytime</li>
+            </ul>
           </div>
 
           <button
             @click="selectPlan('basic')"
             class="select-plan-button secondary"
           >
-            Start Basic Plan
+            Start with Basic
           </button>
         </div>
       </div>
@@ -123,14 +124,12 @@
       </div>
 
       <div class="payment-footer">
-        <div class="security-notice">
-          🔒 Your payment information is encrypted and secure
-        </div>
-        <div class="terms">
+        <p class="security-note">Your payment information is secure and encrypted.</p>
+        <p class="terms">
           By continuing, you agree to our
           <a href="#" @click.prevent>Terms of Service</a> and
-          <a href="#" @click.prevent>Privacy Policy</a>
-        </div>
+          <a href="#" @click.prevent>Privacy Policy</a>.
+        </p>
       </div>
     </div>
   </div>
@@ -211,6 +210,20 @@ const trialEndDate = computed(() => {
     day: "numeric",
     year: "numeric",
   });
+});
+
+// Conditional display logic
+const isLowDisciplineUser = computed(() => {
+  const disciplineAnswer = quizResponses.value.answers?.find(
+    (answer) => answer.questionId === 'morning-routine-discipline'
+  )?.answer;
+  return disciplineAnswer === 'no';
+});
+
+const userBiggestChallenge = computed(() => {
+  return quizResponses.value.answers?.find(
+    (answer) => answer.questionId === 'biggest-challenge'
+  )?.answer;
 });
 
 // Methods

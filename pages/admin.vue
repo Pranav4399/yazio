@@ -7,28 +7,22 @@
 
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
-      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
-      animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s"
+        aria-label="Custom ProgressSpinner" />
     </div>
 
     <!-- Feature flags section -->
     <div v-else class="feature-flags-section">
       <h2 class="section-title">Feature Flags</h2>
       <div class="feature-flags-grid">
-        <div
-          v-for="flag in flagsData"
-          :key="flag.id"
-          class="feature-flag-card"
-        >
+        <div v-for="flag in flagsData" :key="flag.id" class="feature-flag-card">
           <div class="flag-info">
             <h3 class="flag-key">{{ flag.key }}</h3>
           </div>
           <div class="flag-toggle">
-            <InputSwitch
-              v-model="flag.value"
-              @update:modelValue="updateFeatureFlag(flag)"
-              :disabled="updatingFlags.has(flag.id)"
-            />
+            <InputSwitch :modelValue="flag.value === 'true'" @update:modelValue="(val: string) => updateFeatureFlag(flag, val)"
+              :disabled="updatingFlags.has(flag.id)" />
+
             <span v-if="updatingFlags.has(flag.id)" class="updating-text">Updating...</span>
           </div>
         </div>
@@ -45,19 +39,9 @@
       <div class="section-header">
         <h2 class="section-title">Quiz Questions</h2>
         <div class="section-actions">
-          <Button
-            label="Add Question"
-            icon="pi pi-plus"
-            @click="addNewQuestion"
-            class="p-button-sm"
-          />
-          <Button
-            label="Save Changes"
-            icon="pi pi-save"
-            @click="updateQuizQuestions"
-            :loading="updatingQuiz"
-            class="p-button-primary p-button-sm"
-          />
+          <Button label="Add Question" icon="pi pi-plus" @click="addNewQuestion" class="p-button-sm" />
+          <Button label="Save Changes" icon="pi pi-save" @click="updateQuizQuestions" :loading="updatingQuiz"
+            class="p-button-primary p-button-sm" />
         </div>
       </div>
 
@@ -68,88 +52,48 @@
 
       <!-- Quiz questions list -->
       <div v-else class="quiz-questions-list">
-        <div
-          v-for="(question, index) in quizQuestions"
-          :key="question.id"
-          class="question-card"
-        >
+        <div v-for="(question, index) in quizQuestions" :key="question.id" class="question-card">
           <div class="question-header">
             <div class="question-info">
               <h3 class="question-title">{{ question.title }}</h3>
               <span class="question-type">{{ question.type }}</span>
             </div>
-            <Button
-              icon="pi pi-trash"
-              class="p-button-danger p-button-sm"
-              @click="deleteQuestion(index)"
-            />
+            <Button icon="pi pi-trash" class="p-button-danger p-button-sm" @click="deleteQuestion(index)" />
           </div>
 
           <div class="question-content">
             <div class="form-group">
               <label>Title</label>
-              <InputText
-                v-model="question.title"
-                class="full-width"
-              />
+              <InputText v-model="question.title" class="full-width" />
             </div>
 
             <div class="form-group">
               <label>Description</label>
-              <Textarea
-                v-model="question.description"
-                rows="2"
-                class="full-width"
-              />
+              <Textarea v-model="question.description" rows="2" class="full-width" />
             </div>
 
             <div class="form-group">
               <label>Type</label>
-              <Dropdown
-                v-model="question.type"
-                :options="['radio', 'input']"
-                class="full-width"
-              />
+              <Dropdown v-model="question.type" :options="['radio', 'input']" class="full-width" />
             </div>
 
             <div class="form-group">
-              <InputSwitch
-                v-model="question.required"
-                inputId="required-${index}"
-              />
+              <InputSwitch v-model="question.required" inputId="required-${index}" />
               <label for="required-${index}" class="switch-label">Required</label>
             </div>
 
             <!-- Options (only for radio type) -->
             <div v-if="question.type === 'radio'" class="options-section">
               <label>Options</label>
-              <div
-                v-for="(option, optionIndex) in question.options"
-                :key="optionIndex"
-                class="option-item"
-              >
-                <InputText
-                  v-model="option.label"
-                  placeholder="Label"
-                  class="option-input"
-                />
-                <InputText
-                  v-model="option.value"
-                  placeholder="Value"
-                  class="option-input"
-                />
-                <Button
-                  icon="pi pi-trash"
-                  class="p-button-danger p-button-sm"
-                  @click="question.options.splice(optionIndex, 1)"
-                />
+              <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="option-item">
+                <InputText v-model="option.label" placeholder="Label" class="option-input" />
+                <InputText v-model="option.value" placeholder="Value" class="option-input" />
+                <Button icon="pi pi-trash" class="p-button-danger p-button-sm"
+                  @click="question.options.splice(optionIndex, 1)" />
               </div>
-              <Button
-                label="Add Option"
-                icon="pi pi-plus"
+              <Button label="Add Option" icon="pi pi-plus"
                 @click="question.options.push({ id: `option${question.options.length + 1}`, label: '', value: '', description: '' })"
-                class="p-button-sm add-option-btn"
-              />
+                class="p-button-sm add-option-btn" />
             </div>
           </div>
         </div>
@@ -200,6 +144,7 @@ const loadFeatureFlags = async () => {
     errorMessage.value = ''
     const flags = await featureFlags.getAllFeatureFlags()
     if (flags) {
+      console.log(flags);
       flagsData.value = flags;
     }
   } catch (error) {
@@ -211,27 +156,21 @@ const loadFeatureFlags = async () => {
 }
 
 // Update feature flag
-const updateFeatureFlag = async (flag: any) => {
+const updateFeatureFlag = async (flag: any, stringValue: string) => {
   try {
     updatingFlags.value.add(flag.id)
     errorMessage.value = ''
-
-    // Convert boolean to string for database storage
-    const stringValue = flag.value.toString()
-
     // Update in database
     const success = await featureFlags.updateFeatureFlag?.(flag.key, stringValue) ?? false
 
     if (!success) {
       // Revert the toggle if update failed
-      flag.value = !flag.value
-      errorMessage.value = `Failed to update ${flag.key}`
+      errorMessage.value = `Failed to update ${flag.key} to ${stringValue}`
     }
   } catch (error) {
     console.error('Error updating feature flag:', error)
     // Revert the toggle
-    flag.value = !flag.value
-    errorMessage.value = `Failed to update ${flag.key}`
+    errorMessage.value = `Failed to update ${flag.key} to ${stringValue}`
   } finally {
     updatingFlags.value.delete(flag.id)
   }
@@ -298,4 +237,3 @@ onMounted(() => {
   loadQuizQuestions()
 })
 </script>
-

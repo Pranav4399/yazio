@@ -20,7 +20,7 @@
               }"
             ></div>
           </div>
-          <p class="step-text">{{ progressSteps[currentQuestionIndex]?.label || 'Question' }}</p>
+          <p class="step-text">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</p>
         </div>
       </div>
 
@@ -75,7 +75,14 @@
           </button>
           <div class="action-buttons">
             <button
-              v-if="!currentQuestion.required"
+              v-if="!currentQuestion.required && !isLastQuestion"
+              @click="handleNext"
+              class="next-button"
+            >
+              Next
+            </button>
+            <button
+              v-if="!currentQuestion.required && !isLastQuestion"
               @click="skipQuestion"
               class="skip-button"
             >
@@ -226,9 +233,8 @@ const proceedToNext = () => {
   if (isLastQuestion.value) {
     completeQuiz()
     // Check feature flag for branding page
-    const showBranding = featureFlags.value['show-branding'] === 'true'
-    console.log('showBranding', showBranding)
-    navigateTo(showBranding ? '/branding' : '/summary')
+    const brandingFlag = featureFlags.value.find((f: any) => f.key === 'show-branding')?.value === 'true'
+    navigateTo(brandingFlag ? '/branding' : '/summary')
   } else {
     currentQuestionIndex.value++
     loadExistingAnswer(currentQuestionIndex.value)

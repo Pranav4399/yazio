@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const paywallVariantSchema = z.enum(['A', 'B', 'D', 'E'])
+export const paywallVariantSchema = z.enum(['A', 'B', 'C'])
 export type PaywallVariant = z.infer<typeof paywallVariantSchema>
 
 // Paywall variant definitions with behavioral science principles
@@ -17,61 +17,73 @@ export interface PaywallVariantConfig {
 export const PAYWALL_VARIANTS: Record<PaywallVariant, PaywallVariantConfig> = {
   A: {
     id: 'A',
-    headline: 'Join 50,000+ Successful Users',
-    subheadline: 'Transform your health with nutritionist-approved plans backed by science and real results.',
+    headline: 'Take your Yazio journey to the next level',
+    subheadline: 'You\'ve already started tracking with us - now let\'s add the guidance and motivation to turn those good habits into lasting results.',
     benefits: [
-      'Personalized meal plans based on your goals',
-      'Recipes approved by registered dietitians',
-      'Track progress with detailed analytics',
-      '24/7 support from nutrition experts'
+      'Personalized coaching based on your tracking history',
+      'Daily encouragement tailored to your progress',
+      'Advanced insights from your existing data',
+      'Expert support when you need it most'
     ],
-    cta: 'Start Your Transformation',
-    principles: ['authority', 'social_proof'],
-    personalizationType: 'none'
+    cta: 'Upgrade Your Journey',
+    principles: ['continuity', 'progress_acceleration'],
+    personalizationType: 'goal'
   },
   B: {
     id: 'B',
-    headline: 'Don\'t Lose Your Momentum',
-    subheadline: 'You\'ve invested time defining your goals and preferences. Complete your transformation with a personalized plan that matches your commitment.',
+    headline: 'You\'ve built great habits. Now optimize them.',
+    subheadline: 'Your clear goals and consistent tracking show real commitment. Let\'s create a premium plan that maximizes your progress.',
     benefits: [
-      'Custom plans built from your goal selections',
-      'Recipes tailored to your dietary preferences',
-      'Time-efficient meals for your schedule',
-      'Ongoing support to stay committed'
+      'Advanced meal plans built on your preferences',
+      'Pro recipes that complement your current routine',
+      'Time-saving tools for busy schedules',
+      'Priority support from nutrition experts'
     ],
-    cta: 'Complete Your Journey',
-    principles: ['loss_aversion', 'commitment_consistency'],
+    cta: 'Elevate Your Results',
+    principles: ['optimization', 'expertise'],
     personalizationType: 'goal+preferences'
   },
-  D: {
-    id: 'D',
-    headline: 'People Like You Succeed 2x Faster',
-    subheadline: 'Users with your same preferences lose 2x more weight in the first month. Start with achievable daily wins and build lasting habits.',
+  C: {
+    id: 'C',
+    headline: 'Accelerate your progress with premium features',
+    subheadline: 'You know Yazio works - now experience the full potential with expert guidance and advanced tools designed for dedicated users like you.',
     benefits: [
-      'Learn from successful users with similar goals',
-      'Start with small, achievable changes',
-      'Build sustainable healthy habits',
-      'Track progress against similar users'
+      'Professional meal planning and recipes',
+      'In-depth progress analytics and insights',
+      'Direct access to registered dietitians',
+      'Advanced customization options'
     ],
-    cta: 'Join the Success Stories',
-    principles: ['social_comparison', 'small_wins'],
-    personalizationType: 'goal+preferences'
-  },
-  E: {
-    id: 'E',
-    headline: 'Your Custom Plan is Ready',
-    subheadline: 'We\'ve analyzed your goals and created a personalized plan just for you. As a thank you for your time, get unlimited access for 30% off - your first recipe delivered instantly.',
-    benefits: [
-      'Instant access to your personalized plan',
-      '30% discount on your first month',
-      'No commitment, cancel anytime',
-      'Expert guidance included'
-    ],
-    cta: 'Claim Your 30% Discount',
-    principles: ['reciprocity', 'present_bias'],
-    personalizationType: 'full'
+    cta: 'Unlock Premium Benefits',
+    principles: ['acceleration', 'expert_support'],
+    personalizationType: 'goal'
   }
 }
+
+const GOAL_MAP = {
+  'lose-weight': 'specific',
+  'gain-weight': 'specific',
+  'maintain-weight': 'general',
+  'build-muscle': 'specific',
+  'improve-health': 'general'
+}
+
+const DIETARY_PREFERENCE_MAP = {
+  'balanced': 'specific',
+  'quick-recipes': 'specific',
+  'meal-prep': 'specific',
+  'flexible': 'general',
+  '': 'general'
+}
+
+const TIME_COMMITMENT_MAP = {
+  '15min': 'specific',
+  '30min': 'specific',
+  '1hour': 'specific',
+  'flexible': 'general',
+  '': 'general'
+}
+
+const REASON_FOR_DOING_MAP = ['me', 'myself', 'i', 'health', 'fitness', 'body'];
 
 // Selection logic based on user data
 export function selectPaywallVariant(userData: {
@@ -80,31 +92,50 @@ export function selectPaywallVariant(userData: {
   timeCommitment?: string
   quizAnswers?: Array<{ questionId: string; answer: string }>
 }): PaywallVariant {
+
   const { goal, dietaryPreference, timeCommitment, quizAnswers } = userData
 
-  // Check for strong personalization signals
-  const hasDetailedPreferences = dietaryPreference && timeCommitment
-  const hasQuizAnswers = quizAnswers && quizAnswers.length > 0
+  const biggestChallengeAnswer = quizAnswers?.find((answer) => answer.questionId === 'biggest-challenge')?.answer
+  const morningRoutineDisciplineAnswer = quizAnswers?.find((answer) => answer.questionId === 'morning-routine-discipline')?.answer
+  const doingForThemselfAnswer = REASON_FOR_DOING_MAP.includes(quizAnswers?.find((answer) => answer.questionId === 'reason-for-doing')?.answer as string) || false;
+  
+  const goalType = GOAL_MAP[goal as keyof typeof GOAL_MAP]
+  const dietaryPreferenceType = DIETARY_PREFERENCE_MAP[dietaryPreference as keyof typeof DIETARY_PREFERENCE_MAP]
+  const timeCommitmentType = TIME_COMMITMENT_MAP[timeCommitment as keyof typeof TIME_COMMITMENT_MAP]
+  
+  
+  const isBusySchedule = biggestChallengeAnswer === "busy-schedule";
+  const isDisciplined = morningRoutineDisciplineAnswer === "yes";
+  const hasIntrinsicMotivation = doingForThemselfAnswer;
 
-  // Variant E: Full personalization (reciprocity + present bias)
-  // Best for users who've provided detailed information
-  if (hasDetailedPreferences && hasQuizAnswers) {
-    return 'E'
-  }
+  const hasSpecificGoal = goalType === "specific";
+  const hasSpecificDietaryPreference = dietaryPreferenceType === "specific";
+  const hasSpecificTimeCommitment = timeCommitmentType === "specific";
+  
 
-  // Variant B: Goal + preferences (loss aversion + commitment)
-  // Good for users with clear goals and some preferences
-  if (goal && (dietaryPreference || timeCommitment)) {
+  // VARIANT B: STRUCUTURE
+
+  if (
+    (isBusySchedule &&
+      (isDisciplined || hasIntrinsicMotivation)) ||
+    (hasSpecificGoal &&
+      (hasSpecificDietaryPreference || hasSpecificTimeCommitment))
+  ) {
+    // Highly motivated and knows what they want
     return 'B'
   }
 
-  // Variant D: Social comparison (good for weight loss goals)
-  // Effective for goal-oriented users
-  if (goal === 'lose-weight' || goal === 'build-muscle') {
-    return 'D'
+  // VARIANT A: MOTIVATION
+
+  if (
+    (!isBusySchedule &&
+      (!isDisciplined || !hasIntrinsicMotivation)) ||
+    (!hasSpecificGoal &&
+      (!hasSpecificDietaryPreference || !hasSpecificTimeCommitment))
+  ) {
+    // Need Help with Habit Formation
+    return "A";
   }
 
-  // Variant A: Authority + social proof (fallback)
-  // Works for all users, especially those with minimal data
-  return 'A'
+  return 'C'
 }

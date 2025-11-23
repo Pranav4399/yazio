@@ -39,9 +39,28 @@
 
 ## Features
 
-- ✅ User authentication with Supabase
-- ✅ Personalized welcome back experience
-- ✅ Dynamic quiz questions from database
-- ✅ Analytics tracking
-- ✅ A/B testing framework
-- ✅ Feature flags support
+- User authentication with Supabase
+- Personalized welcome back experience
+- Dynamic quiz questions from database
+- Analytics tracking
+- A/B testing framework
+- Feature flags support
+
+## Paywall Variant Selection
+
+The paywall dynamically selects from three variants based on user behavior and preferences:
+
+### Motivation Variant (A)
+For users who need encouragement to start or maintain habits:
+- Biggest challenge: motivation, cravings, or tracking difficulties
+- Goal: improve-health or maintain-weight (from goal page)
+- Dietary preference: flexible or no-preference (from goal page)
+
+### Structure Variant (B)
+For users who benefit from clear guidance and organization:
+- Biggest challenge: busy schedule
+- Goal: build-muscle, lose-weight, or gain-weight (from goal page)
+- Dietary preference: specific preferences (not flexible/no-preference)
+
+### Default Variant (C)
+For all other users - balanced approach with general benefits

@@ -203,7 +203,7 @@ export const useSupabaseQuiz = (supabase: any) => {
 // Feature flags functions
 export const useSupabaseFeatureFlags = (supabase: any) => {
 
-  const getAllFeatureFlags = async (): Promise<{ key: string; value: boolean }[] | null> => {
+  const getAllFeatureFlags = async (): Promise<{ key: string; value: string }[] | null> => {
     const { data, error } = await supabase
       .from('feature_flags')
       .select('key, value')
