@@ -1,5 +1,8 @@
 <template>
-  <div class="quiz-container">
+  <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+   <p>Loading...</p>
+  </div>
+  <div v-if="!loading" class="quiz-container">
     <button @click="goToPreviousPage" class="back-to-previous">
       ← Back
     </button>
@@ -113,6 +116,8 @@ import '~/styles/quiz.css'
 
 const progressSteps = PROGRESS_STEPS
 
+const loading = ref(true)
+
 // Analytics
 const analytics = usePageAnalytics('quiz')
 
@@ -128,6 +133,9 @@ const questionStartTime = ref<number>(0)
 
 // Load questions on mount and initialize first question
 onMounted(async () => {
+  setTimeout(() => {
+    loading.value = false
+  }, 5000);
   const data = await quiz.getQuizQuestions()
   if (data) {
     questions.value = data

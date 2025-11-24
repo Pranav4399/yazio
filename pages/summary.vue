@@ -88,9 +88,6 @@ const progressSteps = PROGRESS_STEPS
 // Analytics
 const analytics = usePageAnalytics('summary')
 
-// Supabase
-const { profiles, getCurrentUser } = useSupabase()
-
 // Global states
 const userProfile = useGlobalUser()
 const { quizResponses } = useQuizManagement()
@@ -180,11 +177,6 @@ const startJourney = () => {
   navigateTo('/payment')
 }
 
-// Note: Summary page should ONLY read from global state
-// Global state is auto-initialized from DB on app load
-// No additional DB loading needed here
-
-// Load all data on component mount (DRY)
 onMounted(async () => {
   await loadData()
 })

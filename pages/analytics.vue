@@ -59,15 +59,12 @@ import { computed } from 'vue'
 import VChart from 'vue-echarts'
 import '~/styles/analytics.css'
 
-// Register echarts components
 use([CanvasRenderer, SankeyChart, FunnelChart, TooltipComponent])
 
-// Route protection middleware
 definePageMeta({
   middleware: 'route-protection'
 })
 
-// Sankey Chart Data - User Flow
 const sankeyOption = computed(() => ({
   tooltip: {
     trigger: 'item'
@@ -93,7 +90,6 @@ const sankeyOption = computed(() => ({
   }
 }))
 
-// Funnel Chart Data - Conversion Analysis
 const funnelOption = computed(() => ({
   tooltip: {
     trigger: 'item'

@@ -30,6 +30,7 @@
       <button class="continue-button" @click="handleContinue">
         Continue
       </button>
+      <button @click="goToPayment">Go to payment</button>
     </div>
   </div>
 </template>
@@ -47,17 +48,19 @@ definePageMeta({
   middleware: 'route-protection'
 })
 
-const { featureFlags } = useWelcomeFlow();
+const { userProfile, loadUserProfile, loading, featureFlags } = useWelcomeFlow()
+const { isAuthenticated } = useSupabase()
+const analytics = usePageAnalytics('welcome')
+
 
 const welcomeFlag = computed(() => {
   const flag = featureFlags.value.find((f: { key: string, value: string }) => f.key === 'welcome-message')
   return flag?.value === 'true'
 })
 
-const { userProfile, loadUserProfile, loading } = useWelcomeFlow()
-const { isAuthenticated } = useSupabase()
-const analytics = usePageAnalytics('welcome')
-
+const goToPayment = () => {
+  navigateTo('/payment?skip=true')
+}
 // Load user profile on mount
 onMounted(async () => {
   if (isAuthenticated()) {

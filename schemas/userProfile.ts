@@ -6,7 +6,6 @@ export interface UserProfile {
   timeCommitment?: '15min' | '30min' | '1hour' | 'flexible'
 }
 
-// Form configuration - used by goal.vue page
 export const USER_PROFILE_FORM = [
   {
     key: 'name' as keyof UserProfile,

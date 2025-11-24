@@ -1,34 +1,33 @@
 import { z } from 'zod'
 
-export const paywallVariantSchema = z.enum(['A', 'B', 'C'])
+export const paywallVariantSchema = z.enum(['B', 'C'])
 export type PaywallVariant = z.infer<typeof paywallVariantSchema>
 
-// Paywall variant definitions with behavioral science principles
 export interface PaywallVariantConfig {
   id: PaywallVariant
   headline: string
   subheadline: string
   benefits: string[]
   cta: string
-  principles: string[] // Behavioral science principles used
+  principles: string[]
   personalizationType: 'none' | 'goal' | 'goal+preferences' | 'full'
 }
 
 export const PAYWALL_VARIANTS: Record<PaywallVariant, PaywallVariantConfig> = {
-  A: {
-    id: 'A',
-    headline: 'Take your Yazio journey to the next level',
-    subheadline: 'You\'ve already started tracking with us - now let\'s add the guidance and motivation to turn those good habits into lasting results.',
-    benefits: [
-      'Personalized coaching based on your tracking history',
-      'Daily encouragement tailored to your progress',
-      'Advanced insights from your existing data',
-      'Expert support when you need it most'
-    ],
-    cta: 'Upgrade Your Journey',
-    principles: ['continuity', 'progress_acceleration'],
-    personalizationType: 'goal'
-  },
+  // A: {
+  //   id: 'A',
+  //   headline: 'Take your Yazio journey to the next level',
+  //   subheadline: 'You\'ve already started tracking with us - now let\'s add the guidance and motivation to turn those good habits into lasting results.',
+  //   benefits: [
+  //     'Personalized coaching based on your tracking history',
+  //     'Daily encouragement tailored to your progress',
+  //     'Advanced insights from your existing data',
+  //     'Expert support when you need it most'
+  //   ],
+  //   cta: 'Upgrade Your Journey',
+  //   principles: ['continuity', 'progress_acceleration'],
+  //   personalizationType: 'goal'
+  // },
   B: {
     id: 'B',
     headline: 'You\'ve built great habits. Now optimize them.',
@@ -85,7 +84,6 @@ const TIME_COMMITMENT_MAP = {
 
 const REASON_FOR_DOING_MAP = ['me', 'myself', 'i', 'health', 'fitness', 'body'];
 
-// Selection logic based on user data
 export function selectPaywallVariant(userData: {
   goal: string
   dietaryPreference?: string
@@ -138,4 +136,17 @@ export function selectPaywallVariant(userData: {
   }
 
   return 'C'
+}
+
+export function variantHash(userId: string) {
+  const str = String(userId);
+  let hash = 5381;
+
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+
+  // Convert to unsigned 32-bit integer
+  return (hash >>> 0) % 2;
+
 }

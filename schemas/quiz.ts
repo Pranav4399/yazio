@@ -1,5 +1,4 @@
-// Quiz types - data comes from Supabase, validated at database level
-export type QuestionId = string // Dynamic, not hardcoded
+export type QuestionId = string 
 export interface QuizAnswer {
   questionId: QuestionId
   answer: string
@@ -11,7 +10,6 @@ export interface QuizResponse {
   completedAt?: number
 }
 
-// Quiz question definitions - matches Supabase data structure
 export interface QuizQuestion {
   id: QuestionId
   title: string

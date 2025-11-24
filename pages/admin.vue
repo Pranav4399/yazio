@@ -5,13 +5,11 @@
       <p class="admin-subtitle">Manage feature flags and system settings</p>
     </div>
 
-    <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s"
         aria-label="Custom ProgressSpinner" />
     </div>
 
-    <!-- Feature flags section -->
     <div v-else class="feature-flags-section">
       <h2 class="section-title">Feature Flags</h2>
       <div class="feature-flags-grid">
@@ -29,12 +27,10 @@
       </div>
     </div>
 
-    <!-- Error message -->
     <div v-if="errorMessage" class="error-message">
       {{ errorMessage }}
     </div>
 
-    <!-- Quiz Questions section -->
     <div class="quiz-section">
       <div class="section-header">
         <h2 class="section-title">Quiz Questions</h2>
@@ -45,12 +41,10 @@
         </div>
       </div>
 
-      <!-- Loading state -->
       <div v-if="loadingQuiz" class="loading-container">
         <ProgressSpinner style="width: 30px; height: 30px" strokeWidth="8" fill="transparent" />
       </div>
 
-      <!-- Quiz questions list -->
       <div v-else class="quiz-questions-list">
         <div v-for="(question, index) in quizQuestions" :key="question.id" class="question-card">
           <div class="question-header">
@@ -82,7 +76,6 @@
               <label for="required-${index}" class="switch-label">Required</label>
             </div>
 
-            <!-- Options (only for radio type) -->
             <div v-if="question.type === 'radio'" class="options-section">
               <label>Options</label>
               <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="option-item">
@@ -99,7 +92,6 @@
         </div>
       </div>
 
-      <!-- Quiz error message -->
       <div v-if="quizErrorMessage" class="error-message">
         {{ quizErrorMessage }}
       </div>
@@ -118,15 +110,12 @@ import { onMounted, ref } from 'vue'
 import { useSupabase } from '~/composables/useSupabase'
 import '~/styles/admin.css'
 
-// Route protection middleware - only allow admin access
 definePageMeta({
   middleware: 'route-protection'
 })
 
-// Composables
 const { featureFlags, quiz } = useSupabase()
 
-// State
 const flagsData = ref<any[]>([])
 const quizQuestions = ref<any[]>([])
 const loading = ref(true)
@@ -137,7 +126,6 @@ const updatingFlags = ref(new Set<string>())
 const updatingQuiz = ref(false)
 
 
-// Load feature flags
 const loadFeatureFlags = async () => {
   try {
     loading.value = true

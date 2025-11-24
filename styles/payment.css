@@ -1,7 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
+.payment-page { 
+  display: flex;
+  width: 100%
+}
+.payment-sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 2rem;
+  min-height: 100%;
+  flex: 1;
+}
+
+.toggle-sidebar-button {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
 .payment-container {
-  min-height: 100vh;
+  min-height: 100%;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -14,6 +36,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   position: relative;
+  flex: 2;
 }
 
 .back-to-previous {
